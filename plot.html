@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="utf-8">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+<body>
+    <div id = 'line_plot'></div>
+    <div id = 'mark_plot'></div>
+    <div id = 'stacked_plot'></div>
+    <div id = 'cumulative_revenue_overlay'></div>
+    <script>
+        var data = [
+            { x: [10, 5 , 3, 5, 8, 10], y: [5, 3, 2, 3, 4, 5], mode: 'markers', name: 'markers_1'},
+            { x: [12, 5, 3, 7 , 1, 3], y: [4, 2, 1, 2, 0, 1], mode: 'markers', name: 'markers_2'},
+            { x: [9, 3, 16, 14, 1, 5], y: [2, 1, 4, 3, 0 , 1], mode: 'markers', name: 'markers_3'}
+        ];
+        
+        var layout = {
+          title: 'Random Values for Line Charts'  
+        };
+    
+        
+        Plotly.newPlot('line_plot', data, layout, {displaylogo: false});
+        
+        for(var i = 0;  i < data.length; i++){
+            data[i].mode = 'lines';
+            data[i].name = 'lines_' + i;
+        }
+        
+        Plotly.newPlot('mark_plot', data, layout, {displaylogo: false});
+        
+        var data_1 = [
+            {x: [1,2,3], y: [2,1,4], fill: 'tozeroy', name: 'number_1'},
+	        {x: [1,2,3], y: [1,1,2], fill: 'tonexty', name: 'number_2'},
+	        {x: [1,2,3], y: [3,0,2], fill: 'tonexty', name: 'number_3'}
+        ];
+        
+        function stackedArea(data){
+            for(var i=1; i<data.length; i++) {
+		        for(var j=0; j<(Math.min(data[i]['y'].length, data[i-1]['y'].length)); j++) {
+			        data[i]['y'][j] += data[i-1]['y'][j]; //Adds current y to y of previous item (creates stacking effect)
+		        }
+	        }
+	        return data;
+        }
+        
+        function makeText(data){
+            for(var i=0; i<data.length; i++ ){
+                data[i].text = Array();
+                for(var j=0; j<data[i].x.length; j++){
+                    data[i].text.push('Text Point ' + data[i].x[j])
+                }
+            }
+            
+            return data;
+        }
+        var layout = { title: 'Stacked Chart'};
+        
+        Plotly.newPlot('stacked_plot', makeText(stackedArea(data_1)), layout, {displaylogo: false});
+        
+        
+        Plotly.d3.csv('data.csv', function(err, data){
+            var input_data = Array();
+            function unpack(data, key){
+                return data.map(function(data) {return data[key]; });
+            }
+            for(var i=0; i<data.length; i++){
+                data[i].type = 'bar';
+                input_data.push({
+                                    x: data[i].date,
+                                    y: data[i].case,
+                                    type: 'bar'
+                                });
+            }
+        
+            console.log(input_data);
+            var layout = { title: 'Bar Chart Check'};
+            
+            Plotly.newPlot('cumulative_revenue_overlay', input_data, layout, {displaylogo:false});
+        });
+    </script>
+    
+</body>
+</html>
